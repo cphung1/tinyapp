@@ -87,11 +87,8 @@ app.post('/login', (req, res) => {
   res.redirect(`/urls`);
 });
 
-// app.get('/login', (req, res) => {
-//   let templateVars = {
-//     username: req.cookies["username"],
-//     // ... any other vars
-//   };
-//   res.render("/urls_index", templateVars);
-// })
-
+// handles logout
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect(`/urls`);
+})
