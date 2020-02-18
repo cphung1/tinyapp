@@ -46,4 +46,7 @@ function generateRandomString() {
   return output;
 }
 
-console.log(generateRandomString());
+app.get("/u/:shortURL", (req, res) => {
+  const longURL =  urlDatabase[req.params.shortURL]
+  res.redirect(longURL);
+});
