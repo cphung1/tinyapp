@@ -1,11 +1,13 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: true })); // use the extended character set 
+const cookieParser = require('cookie-parser');
 
+app.use(bodyParser.urlencoded({ extended: true })); // use the extended character set 
+app.use(cookieParser());
 app.set('view engine', 'ejs');
+
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -18,8 +20,12 @@ app.listen(PORT, () => {
 
 // sends data to urls_index.ejs
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("urls_index", templateVars);
+
 });
 
 // page to input a new url  
@@ -37,14 +43,14 @@ app.get("/urls/:shortURL", (req, res) => {
 // actually takes in the input of edit url form to edit the url
 app.post('/urls/:shortURL', (req, res) => {
   urlDatabase[shortURL] = `http://${req.body.longURL}`;
-  res.redirect(`/urls/${shortURL}`)
+  res.redirect(`/urls/${shortURL}`);
 });
 
 // adds new url to list of urls 
 app.post("/urls", (req, res) => {
-  shortURL = generateRandomString()
+  shortURL = generateRandomString();
   urlDatabase[shortURL] = `http://${req.body.longURL}`;
-  res.redirect(`/urls/${shortURL}`)
+  res.redirect(`/urls/${shortURL}`);
 });
 
 
@@ -59,14 +65,14 @@ function generateRandomString() {
 
 // redirects short url to website page
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]
+  const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 
 // deletes items 
 app.post('/urls/:shortURL/delete', (req, res) => {
   delete urlDatabase[req.params.shortURL];
-  res.redirect('/urls')
+  res.redirect('/urls');
 });
 
 // when you hit edit button redirects to right page
@@ -75,9 +81,17 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   res.redirect(`/urls/${shortURL}`)
 });
 
+// handles login and assigns form submission to a cookie 
+app.post('/login', (req, res) => {
+  res.cookie("username", req.body.name);
+  res.redirect(`/urls`);
+});
 
-
-
-
-
+// app.get('/login', (req, res) => {
+//   let templateVars = {
+//     username: req.cookies["username"],
+//     // ... any other vars
+//   };
+//   res.render("/urls_index", templateVars);
+// })
 
