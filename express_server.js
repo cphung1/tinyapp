@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true })); // use the extended character set 
 
 app.set('view engine', 'ejs');
 
@@ -22,23 +22,31 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// enter new url page thing 
+// page to input a new url  
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-// displays all urls 
+// displays single url on its own page 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  console.log(req.body.longURL);
   res.render("urls_show", templateVars);
 });
 
-// adds new url to databse 
+// actually takes in the input of edit url form to edit the url
+app.post('/urls/:shortURL', (req, res) => {
+  urlDatabase[shortURL] = `http://${req.body.longURL}`;
+  res.redirect(`/urls/${shortURL}`)
+});
+
+// adds new url to list of urls 
 app.post("/urls", (req, res) => {
   shortURL = generateRandomString()
   urlDatabase[shortURL] = `http://${req.body.longURL}`;
   res.redirect(`/urls/${shortURL}`)
 });
+
 
 function generateRandomString() {
   let output = '';
@@ -60,5 +68,16 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls')
 });
+
+// when you hit edit button redirects to right page
+app.post('/urls/:shortURL/edit', (req, res) => {
+  shortURL = req.params.shortURL
+  res.redirect(`/urls/${shortURL}`)
+});
+
+
+
+
+
 
 
