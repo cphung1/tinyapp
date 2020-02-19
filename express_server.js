@@ -108,16 +108,16 @@ app.get('/register', (req, res) => {
 
 // handles login and assigns form submission to a cookie 
 app.post('/login', (req, res) => {
-  if (users === {}) {
-    res.status(403).send('Error: 403');
-  }
-  for (let user in users) {
-    if (users[user]['email'] === req.body.email && users[user]['password'] === req.body.password) {
-      console.log(req.body.id);
-      res.cookie("user_id", users[user]);
-      res.redirect(`/urls`);
+
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(403).send('Error: 403 \n Please fill out both email and password fields')
+  } else {
+    let findEmail = Object.values(users).find(user => user.email === req.body.email);
+    if (!findEmail || req.body.password !== findEmail.password) {
+      res.status(403).send('Error: The email or password is incorrect')
     } else {
-      res.status(403).send('Error: 403');
+      res.cookie("user_id", findEmail);
+      res.redirect(`/urls`);
     }
   }
 
@@ -132,25 +132,25 @@ app.post('/logout', (req, res) => {
 // creates new user upon registration
 app.post('/register', (req, res) => {
 
-  for (let user in users) {
-    if (users[user]['email'] === req.body.email) {
-      res.status(400).send('Error: 400');
+  let randomID = generateRandomString();
+
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400).send('Error: 400 Please enter a email and a password');
+  } else {
+    let foundEmail = Object.values(users).find(user => user.email === req.body.email)
+    if (!foundEmail) {
+      users[randomID] = {
+        id: randomID,
+        email: req.body.email,
+        password: req.body.password
+      }
+      res.cookie("user_id", users[randomID]);
+      res.redirect(`/urls`);
+    } else {
+      res.status(400).send("Error: 400")
     }
   }
 
-  let randomID = generateRandomString();
-  users[randomID] = {
-    id: randomID,
-    email: req.body.email,
-    password: req.body.password
-  }
-
-  if (users[randomID]['email'] === "" || users[randomID]['password'] === "") {
-    res.status(400).send('Error: 400');
-  }
-
-  res.cookie("user_id", users[randomID]);
-  res.redirect(`/urls`);
 
 })
 
