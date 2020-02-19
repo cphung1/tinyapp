@@ -117,6 +117,11 @@ app.post('/register', (req, res) => {
     password: req.body.password
   }
   console.log(users)
+  if (users[randomID]['email'] === "" || users[randomID]['password'] === "") {
+    res.status(400).send('Error: 400');
+  }
+  
+  // console.log(users)
   res.cookie("user_id", randomID);
   res.redirect(`/urls`);
 })
