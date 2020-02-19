@@ -9,12 +9,21 @@ app.use(cookieParser());
 app.set('view engine', 'ejs');
 
 
+const generateRandomString = () => {
+  let output = '';
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < 6; i++) {
+    output += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return output;
+};
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-const users = {};
+const users = { };
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -61,16 +70,6 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-
-function generateRandomString() {
-  let output = '';
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 6; i++) {
-    output += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return output;
-}
-
 // redirects short url to website page
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
@@ -109,19 +108,30 @@ app.get('/register', (req, res) => {
   res.render("registration", templateVars);
 });
 
+// creates new user upon registration
 app.post('/register', (req, res) => {
+
+  for (let user in users) {
+    if (users[user]['email'] === req.body.email) {
+      res.status(400).send('Error: 400');
+    }
+  }
+
   let randomID = generateRandomString();
   users[randomID] = {
     id: randomID,
     email: req.body.email,
     password: req.body.password
   }
+
   console.log(users)
+
   if (users[randomID]['email'] === "" || users[randomID]['password'] === "") {
     res.status(400).send('Error: 400');
   }
-  
+
   // console.log(users)
   res.cookie("user_id", randomID);
   res.redirect(`/urls`);
 })
+
