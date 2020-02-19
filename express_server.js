@@ -34,7 +34,7 @@ app.listen(PORT, () => {
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies["users"]
+    'user_id': req.cookies["user_id"]
   };
   res.render("urls_index", templateVars);
 });
@@ -42,7 +42,7 @@ app.get("/urls", (req, res) => {
 // page to input a new url  
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["users"]
+    'user_id': req.cookies["user_id"]
   };
 
   res.render("urls_new", templateVars);
@@ -53,7 +53,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["users"]
+    'user_id': req.cookies["user_id"]
   };
   res.render("urls_show", templateVars);
 });
@@ -92,20 +92,32 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 // renders login page
 app.get('/login', (req, res) => {
   let templateVars = {
-    username: req.cookies["users"]
+    'user_id': req.cookies["user_id"]
   };
   res.render('login', templateVars)
 });
 
+// displays registration form page
+app.get('/register', (req, res) => {
+  let templateVars = {
+    'user_id': req.cookies["user_id"]
+  };
+
+  res.render("registration", templateVars);
+});
+
 // handles login and assigns form submission to a cookie 
 app.post('/login', (req, res) => {
-
+  if (users === {}) {
+    res.status(403).send('Error: 403');
+  }
   for (let user in users) {
     if (users[user]['email'] === req.body.email && users[user]['password'] === req.body.password) {
-      res.cookie("user_id", req.body.id);
+      console.log(req.body.id);
+      res.cookie("user_id", users[user]);
       res.redirect(`/urls`);
     } else {
-      res.status(403).send('Error: 403')
+      res.status(403).send('Error: 403');
     }
   }
 
@@ -115,14 +127,6 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect(`/urls`);
-});
-
-// displays registration form page
-app.get('/register', (req, res) => {
-  let templateVars = {
-    username: req.cookies["users"]
-  };
-  res.render("registration", templateVars);
 });
 
 // creates new user upon registration
@@ -145,7 +149,8 @@ app.post('/register', (req, res) => {
     res.status(400).send('Error: 400');
   }
 
-  res.cookie("user_id", randomID);
+  res.cookie("user_id", users[randomID]);
   res.redirect(`/urls`);
+
 })
 
