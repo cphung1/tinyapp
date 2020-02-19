@@ -23,17 +23,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = { };
+const users = {};
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+
 // sends data to urls_index.ejs
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    username: req.cookies["users"]
   };
   res.render("urls_index", templateVars);
 });
@@ -41,7 +42,7 @@ app.get("/urls", (req, res) => {
 // page to input a new url  
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"]
+    username: req.cookies["users"]
   };
 
   res.render("urls_new", templateVars);
@@ -52,7 +53,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"]
+    username: req.cookies["users"]
   };
   res.render("urls_show", templateVars);
 });
@@ -88,22 +89,38 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   res.redirect(`/urls/${shortURL}`)
 });
 
+// renders login page
+app.get('/login', (req, res) => {
+  let templateVars = {
+    username: req.cookies["users"]
+  };
+  res.render('login', templateVars)
+});
+
 // handles login and assigns form submission to a cookie 
 app.post('/login', (req, res) => {
-  res.cookie("username", req.body.name);
-  res.redirect(`/urls`);
+
+  for (let user in users) {
+    if (users[user]['email'] === req.body.email && users[user]['password'] === req.body.password) {
+      res.cookie("user_id", req.body.id);
+      res.redirect(`/urls`);
+    } else {
+      res.status(403).send('Error: 403')
+    }
+  }
+
 });
 
 // handles logout
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect(`/urls`);
 });
 
 // displays registration form page
 app.get('/register', (req, res) => {
   let templateVars = {
-    username: req.cookies["username"]
+    username: req.cookies["users"]
   };
   res.render("registration", templateVars);
 });
@@ -124,13 +141,10 @@ app.post('/register', (req, res) => {
     password: req.body.password
   }
 
-  console.log(users)
-
   if (users[randomID]['email'] === "" || users[randomID]['password'] === "") {
     res.status(400).send('Error: 400');
   }
 
-  // console.log(users)
   res.cookie("user_id", randomID);
   res.redirect(`/urls`);
 })
