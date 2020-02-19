@@ -89,7 +89,7 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   res.redirect(`/urls/${shortURL}`)
 });
 
-// renders login page
+// displays login page
 app.get('/login', (req, res) => {
   let templateVars = {
     'user_id': req.cookies["user_id"]
@@ -106,15 +106,15 @@ app.get('/register', (req, res) => {
   res.render("registration", templateVars);
 });
 
-// handles login and assigns form submission to a cookie 
+// handles login and assigns form submission inputs to a cookie 
 app.post('/login', (req, res) => {
 
   if (req.body.email === "" || req.body.password === "") {
-    res.status(403).send('Error: 403 \n Please fill out both email and password fields')
+    res.status(403).send('Error 403: Please fill out both email and password fields')
   } else {
     let findEmail = Object.values(users).find(user => user.email === req.body.email);
     if (!findEmail || req.body.password !== findEmail.password) {
-      res.status(403).send('Error: The email or password is incorrect')
+      res.status(403).send('Error 403: The email or password is incorrect')
     } else {
       res.cookie("user_id", findEmail);
       res.redirect(`/urls`);
@@ -123,7 +123,7 @@ app.post('/login', (req, res) => {
 
 });
 
-// handles logout
+// handles logout, clears cookies
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect(`/urls`);
@@ -135,7 +135,7 @@ app.post('/register', (req, res) => {
   let randomID = generateRandomString();
 
   if (req.body.email === "" || req.body.password === "") {
-    res.status(400).send('Error: 400 Please enter a email and a password');
+    res.status(400).send('Error 400: Please enter a email and a password');
   } else {
     let foundEmail = Object.values(users).find(user => user.email === req.body.email)
     if (!foundEmail) {
@@ -147,10 +147,9 @@ app.post('/register', (req, res) => {
       res.cookie("user_id", users[randomID]);
       res.redirect(`/urls`);
     } else {
-      res.status(400).send("Error: 400")
+      res.status(400).send("Error 400: Email already in use")
     }
   }
-
 
 })
 
