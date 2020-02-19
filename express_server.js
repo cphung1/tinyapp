@@ -14,6 +14,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {};
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
@@ -96,5 +98,25 @@ app.post('/login', (req, res) => {
 // handles logout
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
+  res.redirect(`/urls`);
+});
+
+// displays registration form page
+app.get('/register', (req, res) => {
+  let templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("registration", templateVars);
+});
+
+app.post('/register', (req, res) => {
+  let randomID = generateRandomString();
+  users[randomID] = {
+    id: randomID,
+    email: req.body.email,
+    password: req.body.password
+  }
+  console.log(users)
+  res.cookie("user_id", randomID);
   res.redirect(`/urls`);
 })
