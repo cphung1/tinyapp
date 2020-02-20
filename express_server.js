@@ -40,7 +40,6 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-
 // sends data to urls_index.ejs
 app.get("/urls", (req, res) => {
   if (req.cookies["user_id"] === undefined) {
@@ -84,7 +83,6 @@ app.get("/urls/:shortURL", (req, res) => {
       longURL: urlDatabase[shortURL]['longURL'],
       'user_id': 'undefined'
     };
-    console.log(templateVars[shortURL])
     res.render("urls_show", templateVars);
   } else {
     let templateVars = {
@@ -99,8 +97,12 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // actually takes in the input of edit url form to edit the url
 app.post('/urls/:shortURL', (req, res) => {
-  urlDatabase[shortURL]['longURL'] = `http://${req.body.longURL}`;
-  res.redirect(`/urls/${shortURL}`);
+  if (urlDatabase[shortURL]['userID'] === req.body.id) {
+    urlDatabase[shortURL]['longURL'] = `http://${req.body.longURL}`;
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.redirect('/urls');
+  }
 });
 
 // adds new url to list of urls 
@@ -123,14 +125,19 @@ app.get("/u/:shortURL", (req, res) => {
 
 // deletes items 
 app.post('/urls/:shortURL/delete', (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect('/urls');
+  if (urlDatabase[shortURL]['userID'] === req.body.id) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect('/urls');
+  } else {
+    res.redirect('/urls');
+  }
 });
 
 // when you hit edit button redirects to right page
 app.post('/urls/:shortURL/edit', (req, res) => {
   shortURL = req.params.shortURL
   res.redirect(`/urls/${shortURL}`)
+
 });
 
 // displays login page
