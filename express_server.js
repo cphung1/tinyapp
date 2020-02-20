@@ -4,6 +4,7 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
+const getUserByEmail = require('./helpers');
 
 app.use(bodyParser.urlencoded({ extended: true })); // use the extended character set 
 app.set('view engine', 'ejs');
@@ -38,14 +39,6 @@ const urlsForUser = (id) => {
     }
   }
   return userURLS;
-};
-
-const getUserByEmail = function(email, database) {
-  for (const user in database) {
-    if (database[user]['email'] === email) {
-      return database[user];
-    }
-  }
 };
 
 app.listen(PORT, () => {
