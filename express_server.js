@@ -18,12 +18,23 @@ const generateRandomString = () => {
   return output;
 };
 
+const users = {};
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "aJ48lW" },
+  "sgq3y6": { longURL: "http://www.google.com", userID: "aJ48lW" }
 };
 
-const users = {};
+
+const urlsForUser = (id) => {
+  var userURLS = {};
+  for (const key in urlDatabase) {
+    if (urlDatabase[key]["userID"] === id) {
+      userURLS[key] = urlDatabase[key]
+    }
+  }
+  return userURLS;
+};
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -32,11 +43,22 @@ app.listen(PORT, () => {
 
 // sends data to urls_index.ejs
 app.get("/urls", (req, res) => {
-  let templateVars = {
-    urls: urlDatabase,
-    'user_id': req.cookies["user_id"]
-  };
-  res.render("urls_index", templateVars);
+  if (req.cookies["user_id"] === undefined) {
+    let templateVars = {
+      'user_id': 'undefined',
+      urls: null,
+    }
+    res.render("urls_index", templateVars);
+  } else {
+
+    templateVars = {
+      'user_id': req.cookies["user_id"],
+      urls: urlsForUser(req.cookies["user_id"]['id']),
+    };
+    res.render("urls_index", templateVars);
+  }
+
+
 });
 
 // page to input a new url  
@@ -45,35 +67,57 @@ app.get("/urls/new", (req, res) => {
     'user_id': req.cookies["user_id"]
   };
 
-  res.render("urls_new", templateVars);
+  if (!templateVars['user_id']) {
+    res.redirect('/login')
+  } else {
+    res.render("urls_new", templateVars);
+  }
+
 });
 
 // displays single url on its own page 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
-    'user_id': req.cookies["user_id"]
-  };
-  res.render("urls_show", templateVars);
+
+  if (req.cookies["user_id"] === undefined) {
+    let templateVars = {
+      shortURL: shortURL,
+      longURL: urlDatabase[shortURL]['longURL'],
+      'user_id': 'undefined'
+    };
+    console.log(templateVars[shortURL])
+    res.render("urls_show", templateVars);
+  } else {
+    let templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[shortURL]['longURL'],
+      'user_id': req.cookies["user_id"],
+      userID: req.cookies["user_id"]['id']
+    };
+    res.render("urls_show", templateVars);
+  }
 });
 
 // actually takes in the input of edit url form to edit the url
 app.post('/urls/:shortURL', (req, res) => {
-  urlDatabase[shortURL] = `http://${req.body.longURL}`;
+  urlDatabase[shortURL]['longURL'] = `http://${req.body.longURL}`;
   res.redirect(`/urls/${shortURL}`);
 });
 
 // adds new url to list of urls 
 app.post("/urls", (req, res) => {
   shortURL = generateRandomString();
-  urlDatabase[shortURL] = `http://${req.body.longURL}`;
+  thelongURL = `http://${req.body.longURL}`;
+  urlDatabase[shortURL] = {
+    longURL: thelongURL,
+    userID: req.cookies['user_id']['id'],
+    'user_id': req.cookies['user_id']
+  }
   res.redirect(`/urls/${shortURL}`);
 });
 
 // redirects short url to website page
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL]['longURL'];
   res.redirect(longURL);
 });
 
@@ -114,7 +158,7 @@ app.post('/login', (req, res) => {
   } else {
     let findEmail = Object.values(users).find(user => user.email === req.body.email);
     if (!findEmail || req.body.password !== findEmail.password) {
-      res.status(403).send('Error 403: The email or password is incorrect')
+      res.status(403).send('Error 403: The email and/or password is incorrect')
     } else {
       res.cookie("user_id", findEmail);
       res.redirect(`/urls`);
