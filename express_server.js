@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 
 app.use(bodyParser.urlencoded({ extended: true })); // use the extended character set 
 app.use(cookieParser());
@@ -151,7 +152,7 @@ app.get('/login', (req, res) => {
 // displays registration form page
 app.get('/register', (req, res) => {
   let templateVars = {
-    'user_id': req.cookies["user_id"]
+    'user_id': req.cookies["user_id"],
   };
 
   res.render("registration", templateVars);
@@ -160,11 +161,12 @@ app.get('/register', (req, res) => {
 // handles login and assigns form submission inputs to a cookie 
 app.post('/login', (req, res) => {
 
+  // bcrypt.compareSync("pink-donkey-minotaur", hashedPassword);
   if (req.body.email === "" || req.body.password === "") {
     res.status(403).send('Error 403: Please fill out both email and password fields')
   } else {
     let findEmail = Object.values(users).find(user => user.email === req.body.email);
-    if (!findEmail || req.body.password !== findEmail.password) {
+    if (!findEmail || !bcrypt.compareSync(req.body.password, findEmail.password)) {
       res.status(403).send('Error 403: The email and/or password is incorrect')
     } else {
       res.cookie("user_id", findEmail);
@@ -184,7 +186,7 @@ app.post('/logout', (req, res) => {
 app.post('/register', (req, res) => {
 
   let randomID = generateRandomString();
-
+  let hashpassword = bcrypt.hashSync(req.body.password, 10);
   if (req.body.email === "" || req.body.password === "") {
     res.status(400).send('Error 400: Please enter a email and a password');
   } else {
@@ -193,7 +195,7 @@ app.post('/register', (req, res) => {
       users[randomID] = {
         id: randomID,
         email: req.body.email,
-        password: req.body.password
+        password: hashpassword
       }
       res.cookie("user_id", users[randomID]);
       res.redirect(`/urls`);
