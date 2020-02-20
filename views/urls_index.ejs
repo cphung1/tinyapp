@@ -13,9 +13,9 @@
 
 <body>
   <%- include('./partials/_header') %>,
+
   <main style="margin: 1em;">
     <h3>My URLs</h3>
-
     <% if(user_id && user_id !== 'undefined'){ %>
     <table class="table">
       <thead>
@@ -32,7 +32,7 @@
           <td><%= url %></td>
           <td><%= urls[url]['longURL'] %></td>
           <td>
-            <form method="POST" action="/urls/<%= url %>">
+            <form method="GET" action="/urls/<%= url %>">
               <button type="edit" class="btn btn-outline-primary">Edit</button>
             </form>
           </td>
@@ -48,9 +48,8 @@
     <% } else{ %>
     <p>Please <a href='/login'>login</a> or <a href='/register'>register</a> first to view URLs</p>
     <% } %>
-
-
   </main>
+  
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"

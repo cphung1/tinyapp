@@ -1,4 +1,4 @@
-const getUserByEmail = function (email, database) {
+const getUserByEmail = function(email, database) {
   for (const user in database) {
     if (database[user]['email'] === email) {
       return database[user];
@@ -8,16 +8,15 @@ const getUserByEmail = function (email, database) {
 
 const generateRandomString = () => {
   let output = '';
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (let i = 0; i < 6; i++) {
     output += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return output;
 };
 
-
 const urlsForUser = (id, database) => {
-  var userURLS = {};
+  let userURLS = {};
   for (const key in database) {
     if (database[key]["userID"] === id) {
       userURLS[key] = database[key];
@@ -25,6 +24,5 @@ const urlsForUser = (id, database) => {
   }
   return userURLS;
 };
-
 
 module.exports = { getUserByEmail, generateRandomString, urlsForUser };
