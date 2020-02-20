@@ -4,24 +4,15 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
-const getUserByEmail = require('./helpers');
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
 
-app.use(bodyParser.urlencoded({ extended: true })); // use the extended character set 
 app.set('view engine', 'ejs');
 
+app.use(bodyParser.urlencoded({ extended: true })); // use the extended character set 
 app.use(cookieSession({
   name: 'session',
   secret: 'tinyapp'
 }))
-
-const generateRandomString = () => {
-  let output = '';
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 6; i++) {
-    output += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return output;
-};
 
 const users = {};
 
@@ -30,24 +21,12 @@ const urlDatabase = {
   "sgq3y6": { longURL: "http://www.google.com", userID: "aJ48lW" }
 };
 
-
-const urlsForUser = (id) => {
-  var userURLS = {};
-  for (const key in urlDatabase) {
-    if (urlDatabase[key]["userID"] === id) {
-      userURLS[key] = urlDatabase[key];
-    }
-  }
-  return userURLS;
-};
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 // sends data to urls_index.ejs
 app.get("/urls", (req, res) => {
-
   if (req.session["user_id"] === undefined) {
     let templateVars = {
       user_id: undefined,
@@ -57,7 +36,7 @@ app.get("/urls", (req, res) => {
   } else {
     templateVars = {
       user_id: req.session["user_id"],
-      urls: urlsForUser(req.session["user_id"]['id']),
+      urls: urlsForUser(req.session["user_id"]['id'], urlDatabase),
     };
     res.render("urls_index", templateVars);
   }
@@ -97,45 +76,12 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
-// actually takes in the input of edit url form to edit the url
-app.post('/urls/:shortURL', (req, res) => {
-  if (!req.session['user_id']) {
-    res.redirect('/urls');
-  } else if (urlDatabase[shortURL]['userID'] === req.session['user_id']['id']) {
-    urlDatabase[shortURL]['longURL'] = `http://${req.body.longURL}`;
-    res.redirect(`/urls`);
-  } else {
-    res.status(400).send('Error: You don\'t own this URL');
-  }
-});
-
-// adds new url to list of urls 
-app.post("/urls", (req, res) => {
-  shortURL = generateRandomString();
-  thelongURL = `http://${req.body.longURL}`;
-  urlDatabase[shortURL] = {
-    longURL: thelongURL,
-    userID: req.session['user_id']['id'],
-    user_id: req.session['user_id']
-  }
-  res.redirect(`/urls/${shortURL}`);
-});
-
 // redirects short url to website page
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL]['longURL'];
   res.redirect(longURL);
 });
 
-// deletes items 
-app.post('/urls/:shortURL/delete', (req, res) => {
-  if (urlDatabase[shortURL]['userID'] === req.session['user_id']['id']) {
-    delete urlDatabase[req.params.shortURL];
-    res.redirect('/urls');
-  } else {
-    res.redirect('/urls');
-  }
-});
 
 // displays login page
 app.get('/login', (req, res) => {
@@ -164,6 +110,42 @@ app.get('/register', (req, res) => {
   }
 
 });
+
+// actually takes in the input of edit url form to edit the url
+app.post('/urls/:shortURL', (req, res) => {
+  if (!req.session['user_id']) {
+    res.redirect('/urls');
+  } else if (urlDatabase[shortURL]['userID'] === req.session['user_id']['id']) {
+    urlDatabase[shortURL]['longURL'] = `http://${req.body.longURL}`;
+    res.redirect(`/urls`);
+  } else {
+    res.status(400).send('Error: You don\'t own this URL');
+  }
+});
+
+// adds new url to list of urls 
+app.post("/urls", (req, res) => {
+  shortURL = generateRandomString();
+  thelongURL = `http://${req.body.longURL}`;
+  urlDatabase[shortURL] = {
+    longURL: thelongURL,
+    userID: req.session['user_id']['id'],
+    user_id: req.session['user_id']
+  }
+  res.redirect(`/urls/${shortURL}`);
+});
+
+
+// deletes items 
+app.post('/urls/:shortURL/delete', (req, res) => {
+  if (urlDatabase[shortURL]['userID'] === req.session['user_id']['id']) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect('/urls');
+  } else {
+    res.redirect('/urls');
+  }
+});
+
 
 
 // handles login and assigns form submission inputs to a cookie 
