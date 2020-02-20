@@ -91,8 +91,8 @@ app.get("/urls/:shortURL", (req, res) => {
     templateVars['user_id'] = undefined;
     res.render("urls_show", templateVars);
   } else {
-    templateVars['user_id'] = req.session["user_id"],
-    templateVars['userID'] = req.session["user_id"]['id']
+    templateVars['user_id'] = req.session["user_id"];
+    templateVars['userID'] = req.session["user_id"]['id'];
     res.render("urls_show", templateVars);
   }
 });
@@ -103,9 +103,9 @@ app.post('/urls/:shortURL', (req, res) => {
     res.redirect('/urls');
   } else if (urlDatabase[shortURL]['userID'] === req.session['user_id']['id']) {
     urlDatabase[shortURL]['longURL'] = `http://${req.body.longURL}`;
-    res.redirect(`/urls/${shortURL}`);
+    res.redirect(`/urls`);
   } else {
-    res.redirect('/urls');
+    res.status(400).send('Error: You don\'t own this URL');
   }
 });
 
@@ -137,18 +137,18 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   }
 });
 
-// when you hit edit button redirects to right page
-app.post('/urls/:shortURL/edit', (req, res) => {
-  shortURL = req.params.shortURL;
-  res.redirect(`/urls/${shortURL}`);
-});
-
 // displays login page
 app.get('/login', (req, res) => {
   let templateVars = {
     user_id: req.session["user_id"]
   };
-  res.render('login', templateVars);
+
+  if (req.session['user_id']) {
+    res.redirect('/urls');
+  } else {
+    res.render('login', templateVars);
+  }
+
 });
 
 // displays registration form page
@@ -157,7 +157,12 @@ app.get('/register', (req, res) => {
     user_id: req.session["user_id"],
   };
 
-  res.render("registration", templateVars);
+  if (req.session['user_id']) {
+    res.redirect('/urls');
+  } else {
+    res.render('registration', templateVars);
+  }
+
 });
 
 
@@ -180,7 +185,7 @@ app.post('/login', (req, res) => {
 // handles logout, clears cookies
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect(`/urls`);
+  res.redirect(`/login`);
 });
 
 // creates new user upon registration
