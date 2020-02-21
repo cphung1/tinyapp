@@ -1,4 +1,5 @@
 const express = require("express");
+const methodOverride = require('method-override');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
@@ -11,6 +12,7 @@ app.use(cookieSession({
   name: 'session',
   secret: 'tinyapp'
 }));
+app.use(methodOverride('_method'));
 
 
 // Databse of Users
@@ -18,6 +20,16 @@ const users = {};
 
 // Database of URLs
 const urlDatabase = {};
+
+const uniqueVistors = [undefined];
+
+const checkVistors = (id) => {
+  if (!uniqueVistors.includes(id)) {
+    uniqueVistors.push(id)
+  }
+  console.log(uniqueVistors)
+  return uniqueVistors.length - 1;
+}
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -68,6 +80,8 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]['longURL'],
+    visits: urlDatabase[req.params.shortURL]['visits'],
+    uniqueVisits: checkVistors(),
   };
 
   if (req.session["user_id"] === undefined) {
@@ -83,6 +97,14 @@ app.get("/urls/:shortURL", (req, res) => {
 // upon clicking short URL link redirects short url to website page
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL]['longURL'];
+  urlDatabase[req.params.shortURL]['visits'] += 1;
+
+  if (!req.session['user_id']) {
+    let id = generateRandomString();
+    checkVistors(id);
+  } else {
+    checkVistors(req.session['user_id']['id']);
+  }
   res.redirect(longURL);
 });
 
@@ -94,13 +116,14 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = {
     longURL: thelongURL,
     userID: req.session['user_id']['id'],
-    user_id: req.session['user_id']
+    user_id: req.session['user_id'],
+    visits: 0
   };
   res.redirect(`/urls/${shortURL}`);
 });
 
 // actually takes in the input of edit url form to edit the url
-app.post('/urls/:shortURL', (req, res) => {
+app.put('/urls/:shortURL', (req, res) => {
   if (!req.session['user_id']) {
     res.redirect('/urls');
   } else if (urlDatabase[req.params.shortURL]['userID'] === req.session['user_id']['id']) {
@@ -112,7 +135,7 @@ app.post('/urls/:shortURL', (req, res) => {
 });
 
 // deletes url
-app.post('/urls/:shortURL/delete', (req, res) => {
+app.delete('/urls/:shortURL/delete', (req, res) => {
   if (urlDatabase[req.params.shortURL]['userID'] === req.session['user_id']['id']) {
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
