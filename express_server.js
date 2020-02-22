@@ -27,13 +27,10 @@ const checkVistors = (id) => {
   if (!uniqueVistors.includes(id)) {
     uniqueVistors.push(id)
   }
-  console.log(uniqueVistors)
   return uniqueVistors.length - 1;
 }
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
+const timesOfVists = { ID: [], time: []}
 
 // redirects to appropriate page based on if user is logged in
 app.get("/", (req, res) => {
@@ -82,6 +79,7 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlDatabase[req.params.shortURL]['longURL'],
     visits: urlDatabase[req.params.shortURL]['visits'],
     uniqueVisits: checkVistors(),
+    visitTimes: timesOfVists,
   };
 
   if (req.session["user_id"] === undefined) {
@@ -101,10 +99,13 @@ app.get("/u/:shortURL", (req, res) => {
 
   if (!req.session['user_id']) {
     let id = generateRandomString();
+    timesOfVists['ID'].push(id)
     checkVistors(id);
   } else {
+    timesOfVists['ID'].push(req.session['user_id']['id'])
     checkVistors(req.session['user_id']['id']);
   }
+  timesOfVists['time'].push(Date());
   res.redirect(longURL);
 });
 
@@ -117,7 +118,7 @@ app.post("/urls", (req, res) => {
     longURL: thelongURL,
     userID: req.session['user_id']['id'],
     user_id: req.session['user_id'],
-    visits: 0
+    visits: 0,
   };
   res.redirect(`/urls/${shortURL}`);
 });
@@ -208,4 +209,8 @@ app.post('/register', (req, res) => {
 app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect(`/login`);
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });

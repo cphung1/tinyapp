@@ -12,13 +12,32 @@
   <%- include('./partials/_header') %>
 
   <div class="card text-center">
+
     <div class="card-header"></div>
     <div class="card-body">
       <h5 class="card-title">TinyURL for: <%= longURL %></h5>
       <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       <p>Number of visits: <%= visits %></p>
       <p>Number of unique vistors: <%= uniqueVisits %></p>
+
+      <table class="table table-boderless">
+        <thead>
+          <tr class="table">
+            <th scope="col">User ID</th>
+            <th scope="col">Time of Vistors</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for(let visits in visitTimes['ID']) { %>
+          <tr>
+            <td><%= visitTimes['ID'][visits] %></td>
+            <td><%= visitTimes['time'][visits] %></td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
     </div>
+
     <div class="card-footer text-muted">
       <h3>Edit</h3>
       <form class="form-inline" action="/urls/<%= shortURL %>?_method=PUT" method="POST">
@@ -30,6 +49,7 @@
         </div>
       </form>
     </div>
+    
   </div>
 
   <!-- Bootstrap JS -->

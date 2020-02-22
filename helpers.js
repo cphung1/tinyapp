@@ -1,3 +1,4 @@
+// searches through userdatabase, if with email exists returns user
 const getUserByEmail = function(email, database) {
   for (const user in database) {
     if (database[user]['email'] === email) {
@@ -6,6 +7,7 @@ const getUserByEmail = function(email, database) {
   }
 };
 
+// generates a unique ID
 const generateRandomString = () => {
   let output = '';
   let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -15,6 +17,7 @@ const generateRandomString = () => {
   return output;
 };
 
+// detects who URL belongs to
 const urlsForUser = (id, database) => {
   let userURLS = {};
   for (const key in database) {
