@@ -111,7 +111,8 @@ app.get("/u/:shortURL", (req, res) => {
 // generates short URL and adds it to list of database of URLs
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  let thelongURL = `http://${req.body.longURL}`;
+  // let thelongURL = `http://${req.body.longURL}`;
+  let thelongURL = req.body.longURL;
 
   urlDatabase[shortURL] = {
     longURL: thelongURL,
