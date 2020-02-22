@@ -5,7 +5,7 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
-const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
+const { getUserByEmail, generateRandomString, urlsForUser, fetchMyIP, checkVistors } = require('./helpers');
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true })); // use the extended character set
 app.use(cookieSession({
@@ -22,13 +22,6 @@ const users = {};
 const urlDatabase = {};
 
 const uniqueVistors = [undefined];
-
-const checkVistors = (id) => {
-  if (!uniqueVistors.includes(id)) {
-    uniqueVistors.push(id)
-  }
-  return uniqueVistors.length - 1;
-}
 
 const timesOfVists = { ID: [], time: [] }
 
@@ -78,7 +71,7 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]['longURL'],
     visits: urlDatabase[req.params.shortURL]['visits'],
-    uniqueVisits: checkVistors(),
+    uniqueVisits: checkVistors(uniqueVistors),
     visitTimes: timesOfVists,
   };
 
@@ -99,14 +92,19 @@ app.get("/u/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL]['visits'] += 1;
 
   if (!req.session['user_id']) {
-    let id = generateRandomString();
-    timesOfVists['ID'].push(id)
-    checkVistors(id);
+    id = 1;
+    fetchMyIP().then((body) => {
+      const ip = JSON.parse(body).ip
+      timesOfVists['ID'].push(ip)
+      checkVistors(uniqueVistors, ip);
+    });
   } else {
     timesOfVists['ID'].push(req.session['user_id']['id'])
-    checkVistors(req.session['user_id']['id']);
+    checkVistors(uniqueVistors, req.session['user_id']['id']);
   }
-  timesOfVists['time'].push(Date());
+  let timezone = new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"});
+  let date = new Date(timezone)
+  timesOfVists['time'].push(date.toLocaleString());
   res.redirect(longURL);
 });
 

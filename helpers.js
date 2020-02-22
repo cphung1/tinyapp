@@ -1,5 +1,7 @@
+const request = require('request-promise-native');
+
 // searches through userdatabase, if with email exists returns user
-const getUserByEmail = function(email, database) {
+const getUserByEmail = function (email, database) {
   for (const user in database) {
     if (database[user]['email'] === email) {
       return database[user];
@@ -28,4 +30,17 @@ const urlsForUser = (id, database) => {
   return userURLS;
 };
 
-module.exports = { getUserByEmail, generateRandomString, urlsForUser };
+// makes request and fetches ip address
+const fetchMyIP = function () {
+  return request('https://api.ipify.org?format=json')
+}
+
+// checks if vistior has already clicked link, if not add their id to list
+const checkVistors = (arr, id) => {
+  if (!arr.includes(id)) {
+    arr.push(id)
+  }
+  return arr.length - 1;
+}
+
+module.exports = { getUserByEmail, generateRandomString, urlsForUser, fetchMyIP, checkVistors };
