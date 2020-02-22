@@ -1,5 +1,7 @@
+const request = require('request-promise-native');
+
 // searches through userdatabase, if with email exists returns user
-const getUserByEmail = function(email, database) {
+const getUserByEmail = function (email, database) {
   for (const user in database) {
     if (database[user]['email'] === email) {
       return database[user];
@@ -28,4 +30,22 @@ const urlsForUser = (id, database) => {
   return userURLS;
 };
 
-module.exports = { getUserByEmail, generateRandomString, urlsForUser };
+const fetchMyIP = function () {
+  return request('https://api.ipify.org?format=json')
+}
+
+// const fetchMyIP = function (callback) {
+//   request('https://api.ipify.org?format=json', (error, response, body) => {
+//     if (error) return callback(error, null);
+
+//     if (response.statusCode !== 200) {
+//       callback(Error(`Status Code ${response.statusCode} when fetching IP: ${body}`), null);
+//       return;
+//     }
+
+//     const ip = JSON.parse(body).ip;
+//     callback(null, ip);
+//   });
+// };
+
+module.exports = { getUserByEmail, generateRandomString, urlsForUser, fetchMyIP };

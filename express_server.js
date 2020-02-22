@@ -5,7 +5,7 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
-const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
+const { getUserByEmail, generateRandomString, urlsForUser, fetchMyIP } = require('./helpers');
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true })); // use the extended character set
 app.use(cookieSession({
@@ -30,7 +30,7 @@ const checkVistors = (id) => {
   return uniqueVistors.length - 1;
 }
 
-const timesOfVists = { ID: [], time: []}
+const timesOfVists = { ID: [], time: [] }
 
 // redirects to appropriate page based on if user is logged in
 app.get("/", (req, res) => {
@@ -84,6 +84,8 @@ app.get("/urls/:shortURL", (req, res) => {
 
   if (req.session["user_id"] === undefined) {
     res.status(400).send('Error 400: Please login');
+  } else if (urlDatabase[req.params.shortURL]['userID'] !== req.session['user_id']['id']) {
+    res.status(400).send('Error 400: You do not own this URL');
   } else {
     templateVars['user_id'] = req.session["user_id"];
     templateVars['userID'] = req.session["user_id"]['id'];
@@ -97,9 +99,12 @@ app.get("/u/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL]['visits'] += 1;
 
   if (!req.session['user_id']) {
-    let id = generateRandomString();
-    timesOfVists['ID'].push(id)
-    checkVistors(id);
+    id = 1;
+    fetchMyIP().then((body) => {
+      const ip = JSON.parse(body).ip
+      timesOfVists['ID'].push(ip)
+      checkVistors(ip);
+    });
   } else {
     timesOfVists['ID'].push(req.session['user_id']['id'])
     checkVistors(req.session['user_id']['id']);
@@ -111,7 +116,8 @@ app.get("/u/:shortURL", (req, res) => {
 // generates short URL and adds it to list of database of URLs
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  let thelongURL = `http://${req.body.longURL}`;
+  // let thelongURL = `http://${req.body.longURL}`;
+  let thelongURL = req.body.longURL;
 
   urlDatabase[shortURL] = {
     longURL: thelongURL,
