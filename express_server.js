@@ -83,8 +83,7 @@ app.get("/urls/:shortURL", (req, res) => {
   };
 
   if (req.session["user_id"] === undefined) {
-    templateVars['user_id'] = undefined;
-    res.render("urls_show", templateVars);
+    res.status(400).send('Error 400: Please login');
   } else {
     templateVars['user_id'] = req.session["user_id"];
     templateVars['userID'] = req.session["user_id"]['id'];
