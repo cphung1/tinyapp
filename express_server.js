@@ -30,7 +30,7 @@ const checkVistors = (id) => {
   return uniqueVistors.length - 1;
 }
 
-const timesOfVists = { ID: [], time: []}
+const timesOfVists = { ID: [], time: [] }
 
 // redirects to appropriate page based on if user is logged in
 app.get("/", (req, res) => {
@@ -84,6 +84,8 @@ app.get("/urls/:shortURL", (req, res) => {
 
   if (req.session["user_id"] === undefined) {
     res.status(400).send('Error 400: Please login');
+  } else if (urlDatabase[req.params.shortURL]['userID'] !== req.session['user_id']['id']) {
+    res.status(400).send('Error 400: You do not own this URL');
   } else {
     templateVars['user_id'] = req.session["user_id"];
     templateVars['userID'] = req.session["user_id"]['id'];
