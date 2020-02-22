@@ -21,8 +21,10 @@ const users = {};
 // Database of URLs
 const urlDatabase = {};
 
+// Database of visitors ID
 const uniqueVistors = [undefined];
 
+// Databse of visitors ID + time stamp of when they accessed /u/:shortURL
 const timesOfVists = { ID: [], time: [] }
 
 // redirects to appropriate page based on if user is logged in
@@ -102,7 +104,7 @@ app.get("/u/:shortURL", (req, res) => {
     timesOfVists['ID'].push(req.session['user_id']['id'])
     checkVistors(uniqueVistors, req.session['user_id']['id']);
   }
-  let timezone = new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"});
+  let timezone = new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
   let date = new Date(timezone)
   timesOfVists['time'].push(date.toLocaleString());
   res.redirect(longURL);
