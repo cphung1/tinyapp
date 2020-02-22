@@ -6,7 +6,7 @@ Users need to create an account and be logged in to create shortened URLs. Their
 
 ## Final Product
 URLS page when logged in
-!["Screenshot of URLS page when logged in"](https://github.com/cphung1/tinyapp/blob/master/docs/urls-page-logged.png)
+!["Screenshot of URLS page when logged in"](https://github.com/cphung1/tinyapp/blob/master/docs/urls-page-stretch.png)
 
 Enter a new URL
 !["Screenshot of new URL page"](https://github.com/cphung1/tinyapp/blob/master/docs/new-url.png)
