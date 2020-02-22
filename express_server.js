@@ -113,7 +113,6 @@ app.get("/u/:shortURL", (req, res) => {
 // generates short URL and adds it to list of database of URLs
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  // let thelongURL = `http://${req.body.longURL}`;
   let thelongURL = req.body.longURL;
 
   urlDatabase[shortURL] = {
@@ -130,7 +129,7 @@ app.put('/urls/:shortURL', (req, res) => {
   if (!req.session['user_id']) {
     res.redirect('/urls');
   } else if (urlDatabase[req.params.shortURL]['userID'] === req.session['user_id']['id']) {
-    urlDatabase[req.params.shortURL]['longURL'] = `http://${req.body.longURL}`;
+    urlDatabase[req.params.shortURL]['longURL'] = req.body.longURL;
     res.redirect(`/urls`);
   } else {
     res.status(400).send('Error: You don\'t own this URL');
