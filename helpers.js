@@ -30,22 +30,17 @@ const urlsForUser = (id, database) => {
   return userURLS;
 };
 
+// makes request and fetches ip address
 const fetchMyIP = function () {
   return request('https://api.ipify.org?format=json')
 }
 
-// const fetchMyIP = function (callback) {
-//   request('https://api.ipify.org?format=json', (error, response, body) => {
-//     if (error) return callback(error, null);
+// checks if vistior has already clicked link, if not add their id to list
+const checkVistors = (arr, id) => {
+  if (!arr.includes(id)) {
+    arr.push(id)
+  }
+  return arr.length - 1;
+}
 
-//     if (response.statusCode !== 200) {
-//       callback(Error(`Status Code ${response.statusCode} when fetching IP: ${body}`), null);
-//       return;
-//     }
-
-//     const ip = JSON.parse(body).ip;
-//     callback(null, ip);
-//   });
-// };
-
-module.exports = { getUserByEmail, generateRandomString, urlsForUser, fetchMyIP };
+module.exports = { getUserByEmail, generateRandomString, urlsForUser, fetchMyIP, checkVistors };
